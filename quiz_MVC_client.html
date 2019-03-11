@@ -18,56 +18,57 @@ localStorage.quizzes = localStorage.quizzes || initial_quizzes;
     // VIEWs
 
 const index = (quizzes) => quizzes.reduce((ac, quiz, id) => 
-    ac +=`<div><span class="play"   quizid="${id}">${quiz.question}</span>
-             <button class="edit"   quizid="${id}">Edit</button>
-             <button class="delete" quizid="${id}">Delete</button>
-        </div>\n`,
-        ""
-    )
+ac +=`<div><span class="play"   quizid="${id}">${quiz.question}</span>
+  <button class="edit"   quizid="${id}">Edit</button>
+  <button class="delete" quizid="${id}">Delete</button>
+  </div>\n`,
+  ""
+  )
   + `<button class="new">  New Quiz</button>
-     <button class="reset">Reset Quizzes</button>`;
-
+  <button class="reset">Reset Quizzes</button>`;
+  
 const play = (id, question) =>
 `   ${question}:
-    <p>
-        <input  type="text" id="answer" placeholder="Answer" >
-        <button class="check" quizid="${id}">Check</button>
-        <p>
-            <div id='msg'></div>
-        </p>
+<p>
+  <input  type="text" id="answer" placeholder="Answer" >
+  <button class="check" quizid="${id}">Check</button>
+  <p>
+    <div id='msg'></div>
+    </p>
     </p>
     <button class="index">Go back</button>
-`;
-
+    `;
+      
 const quizForm = (msg, event, id, question, answer) =>
+// console.log(event)
 `   ${msg}:
-    <p>
-        <input  type="text" id="question" value="${question}" placeholder="Question" >
-        <input  type="text" id="answer"   value="${answer}"   placeholder="Answer" >
-        <button class="${event}" quizid="${id}">${event}</button>
-    </p>
-    <button class="index">Go back</button>
-`;
-
-   // CONTROLLERs
-
+<p>
+  <input  type="text" id="question" value="${question}" placeholder="Question" >
+  <input  type="text" id="answer"   value="${answer}"   placeholder="Answer" >
+  <button class="${event}" quizid="${id}">${event}</button>
+  </p>
+  <button class="index">Go back</button>
+  `;
+        
+        // CONTROLLERs
+        
 const indexController = () => {
-    let quizzes = JSON.parse(localStorage.quizzes);
-    $('#main').html(index(quizzes));
+  let quizzes = JSON.parse(localStorage.quizzes);
+  $('#main').html(index(quizzes));
 };
-
+        
 const playController = (id) => {
-    let { question } = JSON.parse(localStorage.quizzes)[id];
-    $('#main').html(play(id, question));
+  let { question } = JSON.parse(localStorage.quizzes)[id];
+  $('#main').html(play(id, question));
 };
 
 const checkController = (id) => {
-    let {question, answer } = JSON.parse(localStorage.quizzes)[id];
-    let my_answer = $('#answer').val();
-    let response = (my_answer===answer) ?
-          `Yes, "${my_answer}" is the ${question}`
-        : `No, "${my_answer}" is not the ${question}`;
-    $('#msg').html(response);
+  let {question, answer } = JSON.parse(localStorage.quizzes)[id];
+  let my_answer = $('#answer').val();
+  let response = (my_answer===answer) ?
+        `Yes, "${my_answer}" is the ${question}`
+      : `No, "${my_answer}" is not the ${question}`;
+  $('#msg').html(response);
 };
 
 const editController = (id) => {
@@ -84,19 +85,30 @@ const updateController = (id) => {
 };
 
 const newController = () => {
-    // ..... introducir código
-};
+    $('#main').html(quizForm('New Quiz', 'create', 0, "", ""));
+    };
 
 const createController = () => {
-    // ..... introducir código
+    let quizzes = JSON.parse(localStorage.quizzes);
+    quizzes.push({
+      "question": $('#question').val(),
+      "answer": $('#answer').val()
+    })
+    localStorage.quizzes = JSON.stringify(quizzes);
+    indexController();
 };
 
 const deleteController = (id) => {
-    // ..... introducir código
+    let quizzes = JSON.parse(localStorage.quizzes);
+    console.log(quizzes)
+    quizzes.splice(id, 1);
+    localStorage.quizzes = JSON.stringify(quizzes);
+    indexController();
 };
 
 const resetController = (id) => {
-    // ..... introducir código
+    localStorage.quizzes = initial_quizzes;
+    indexController();
 };
 
 
@@ -108,8 +120,13 @@ const eventsController = ()=> {
   $(document).on('click','.check',  (e)=> checkController(Number($(e.target).attr("quizid"))));
   $(document).on('click','.edit',   (e)=> editController(Number($(e.target).attr("quizid"))));
   $(document).on('click','.update', (e)=> updateController(Number($(e.target).attr("quizid"))));
-
-    // ..... añadir manejadores de eventos new, create, delete y reset
+  $(document).on('click', '.new', () => newController());
+  $(document).on('click', '.create', () => createController());
+  $(document).on('click', '.delete', (e) => {
+    let confirmar = confirm('¿Desea eliminar la pregunta?');
+    if(confirmar) deleteController(Number($(e.target).attr("quizid")))
+  });
+  $(document).on('click', '.reset', () => resetController());  
 }
 
 
